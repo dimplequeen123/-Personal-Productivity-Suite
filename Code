@@ -1,1 +1,55 @@
+import time
+from functools import wraps
 
+def rate_limit(seconds):
+    """Decorator factory that creates the actual rate limiter."""
+    
+    # 1. Initialize a variable to track the last call time (outside the decorator closure)
+    last_called = 0 
+    
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            nonlocal last_called # Allows modification of 'last_called' from the outer scope
+            
+            # 2. Get the current time
+            now = time.time()
+            
+            # 3. Calculate time elapsed since the last call
+            time_elapsed = now - last_called
+            
+            # 4. Check the time constraint
+            if time_elapsed < seconds:
+                wait_time = round(seconds - time_elapsed, 1)
+                print(f"🛑 Error: Wait {wait_time} seconds before trying '{func.__name__}' again.")
+                return None # Prevent execution
+            
+            # 5. Execute the function and update the timestamp
+            result = func(*args, **kwargs)
+            last_called = now
+            return result
+        return wrapper
+    return decorator
+
+# --- Example Usage ---
+
+@rate_limit(seconds=5) # Allows 'send_message' to be called only once every 5 seconds
+def send_message(user):
+    print(f"✅ Message sent to {user}.")
+
+print("--- First Call (Success) ---")
+send_message("Alice")
+
+print("\n--- Immediate Second Call (Blocked) ---")
+send_message("Alice") 
+send_message("Bob") # Still blocked, the limit is on the function itself
+
+time.sleep(3) # Wait for 3 seconds
+
+print("\n--- Third Call (Still Blocked, needs 2 more seconds) ---")
+send_message("Charlie")
+
+time.sleep(2.1) # Wait for 2.1 more seconds
+
+print("\n--- Fourth Call (Success after wait) ---")
+send_message("David")
