@@ -44,6 +44,7 @@ Run the application:
 Bash
 
 python main.py
+
 📂 Project Structure
 Plaintext
 
@@ -59,6 +60,7 @@ personal-productivity-suite/
 ├── docs/                  # Technical Manuals
 ├── tests/                 # Unit Tests
 └── requirements.txt       # Project Dependencies
+
 🧪 Technical Implementation Details
 Data Persistence: Uses the json and csv modules to ensure data survives application restarts.
 
